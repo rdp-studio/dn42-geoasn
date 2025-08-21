@@ -1,0 +1,54 @@
+name: Build GeoLite2-ASN-DN42 mmdb
+
+on:
+  workflow_dispatch:    
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+      
+      - name: Install dependencies
+        run: |
+          go install
+      
+      - name: Clone DN42 registry
+        run: |
+          git clone --depth=1 https://${{ secrets.DN42_USER }}:${{ secrets.DN42_TOKEN }}@git.dn42.dev/dn42/registry.git registry
+      
+      - name: Prepare Source
+        run: |
+          python finder.py
+      
+      - name: Build mmdb
+        run: |
+          go run generator.go
+      
+      - name: Get current date
+        id: date
+        run: echo "DATE=$(date +'%Y.%m.%d-%H%M%S')" >> $GITHUB_ENV
+      
+      - name: Upload GeoLite2-ASN-DN42
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.DATE }}
+          name: "GeoLite2-ASN-DN42 ${{ env.DATE }}"
+          body: "This is a automatic release of GeoLite2-ASN-DN42.mmdb"
+          files: GeoLite2-ASN-DN42.mmdb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
