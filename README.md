@@ -21,7 +21,7 @@ DN42-GeoASN consists of two main components:
 ## Prerequisites
 
 - Python 3.x
-- Go 1.23.4 or later
+- Go 1.24.6 or later
 - DN42 registry (cloned locally)
 
 ## Quick Start (Pre-built Database)
