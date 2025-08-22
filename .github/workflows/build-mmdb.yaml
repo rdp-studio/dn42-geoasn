@@ -33,6 +33,8 @@ jobs:
       - name: Clone DN42 registry
         run: |
           git clone --depth=1 https://${{ secrets.DN42_USER }}:${{ secrets.DN42_TOKEN }}@git.dn42.dev/dn42/registry.git registry
+          cd registry
+          echo "REGISTRY_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
       
       - name: Prepare Source
         run: |
@@ -51,7 +53,8 @@ jobs:
         with:
           tag_name: ${{ env.DATE }}
           name: "GeoLite2-ASN-DN42 ${{ env.DATE }}"
-          body: "This is a automatic release of GeoLite2-ASN-DN42.mmdb"
+          body: |
+            This is an automatic release, based on registry commit: [${{ env.REGISTRY_COMMIT }}](https://git.dn42.dev/dn42/registry/commit/${{ env.REGISTRY_COMMIT }})
           files: GeoLite2-ASN-DN42.mmdb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
